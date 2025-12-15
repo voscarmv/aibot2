@@ -87,7 +87,13 @@ export class OpenAiClient implements AiClient {
             tool_calls
         };
     }
-    async runAI(messages: ChatCompletionMessageParam[], additionalArgs: object = {}, additionalInstructionsArgs: object = {}): Promise<ChatCompletionMessageParam[]> {
+    async runAI(
+        messages: ChatCompletionMessageParam[],
+        additionalArgs: object = {},
+        additionalInstructionsArgs: object = {}):
+        Promise<
+            ChatCompletionMessageParam[]
+        >{
         const output: ChatCompletionMessageParam[] = [];
         const conversation: ChatCompletionMessageParam[] = [...messages];
         conversation.unshift({
