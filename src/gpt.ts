@@ -85,7 +85,7 @@ export class OpenAiClient implements AiClient {
                 }
                 conversation.splice(insertIndex, 0, {
                     role: 'system',
-                    content: this.additionalInstructions(additionalInstructionsArgs)
+                    content: addInst
                 });
             }
             const reply = await this.#gpt(conversation, this.tools);
