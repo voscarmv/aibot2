@@ -1,15 +1,15 @@
 import { type AiClient } from "./gpt.js";
-import { type DbApi } from "./db.js";
+import { type MessageStore } from "./db.js";
 import type {
     ChatCompletionMessageParam,
 } from "openai/resources";
 
 export class ChatService {
     #aiClient: AiClient;
-    #dbApi: DbApi;
+    #dbApi: MessageStore;
     #busy: string[];
 
-    constructor(aiClient: AiClient, dbApi: DbApi) {
+    constructor(aiClient: AiClient, dbApi: MessageStore) {
         this.#aiClient = aiClient;
         this.#dbApi = dbApi;
         this.#busy = [];
