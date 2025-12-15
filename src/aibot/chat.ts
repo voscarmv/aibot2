@@ -48,7 +48,7 @@ export class ChatService {
     async processMessages(
         user_id: string,
         message: string,
-        additionalArgs?: object,
+        additionalToolsArgs?: object,
         additionalInstructionsArgs?: object):
         Promise<
             ChatCompletionMessageParam[]
@@ -61,7 +61,7 @@ export class ChatService {
             while (queued.length > 0) {
                 await this.#messageStore.unqueueUserMessages(user_id);
                 const msgs = await this.#messageStore.readUserMessages(user_id);
-                const reply = await this.#aiClient.runAI(msgs, additionalArgs, additionalInstructionsArgs);
+                const reply = await this.#aiClient.runAI(msgs, additionalToolsArgs, additionalInstructionsArgs);
                 await this.#messageStore.insertMessages(user_id, false, reply);
                 output.concat(reply);
                 queued = await this.#messageStore.queuedMessages(user_id);

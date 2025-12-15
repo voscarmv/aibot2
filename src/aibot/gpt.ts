@@ -10,7 +10,7 @@ import type {
 export interface AiClient {
     runAI(
         messages: ChatCompletionMessageParam[],
-        additionalArgs?: object,
+        additionalToolsArgs?: object,
         additionalInstructionsArgs?: object):
         Promise<ChatCompletionMessageParam[]>;
 }
@@ -19,7 +19,7 @@ type OpenAiClientOptions = {
   apiKey: string;
   model?: string;
   instructions: string;
-  additionalInstructions?: (...args: unknown[]) => string;
+  additionalInstructions?: (args: object) => string;
   tools?: ChatCompletionTool[];
   functions?: Record<string, (arg1: object, arg2: object) => Promise<string>>;
 };
@@ -27,7 +27,7 @@ export class OpenAiClient implements AiClient {
   #openai: OpenAI;
   private model: string;
   private instructions: string;
-  private additionalInstructions: (...args: unknown[]) => string;
+  private additionalInstructions: (args: object) => string;
   private tools: ChatCompletionTool[];
   private functions: Record<string, (arg1: object, arg2: object) => Promise<string>>;
   constructor({
@@ -91,7 +91,7 @@ export class OpenAiClient implements AiClient {
     }
     async runAI(
         messages: ChatCompletionMessageParam[],
-        additionalArgs: object = {},
+        additionaToolslArgs: object = {},
         additionalInstructionsArgs: object = {}):
         Promise<
             ChatCompletionMessageParam[]
@@ -125,11 +125,10 @@ export class OpenAiClient implements AiClient {
             conversation.push(reply.message);
             if (reply.tool_calls) {
                 for (const toolCall of reply.tool_calls) {
-                    // for (let i = 0; i < reply.tool_calls.length; i++) {
                     if (toolCall.type !== 'function') {
                         continue;
                     }
-                    const result = await this.#callTool(toolCall, additionalArgs)
+                    const result = await this.#callTool(toolCall, additionaToolslArgs)
                     output.push({
                         role: 'tool',
                         tool_call_id: result.tool_call_id,
