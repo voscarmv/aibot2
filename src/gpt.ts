@@ -101,11 +101,12 @@ export class OpenAiClient implements AiClient {
             output.push(reply.message);
             conversation.push(reply.message);
             if (reply.tool_calls) {
-                for (let i = 0; i < reply.tool_calls.length; i++) {
-                    if(!reply.tool_calls[i]){
-                        throw Error(' Tool call undefined')
+                for (const toolCall of reply.tool_calls) {
+                    // for (let i = 0; i < reply.tool_calls.length; i++) {
+                    if (toolCall.type !== 'function') {
+                        continue;
                     }
-                    const result = await this.#callTool(reply.tool_calls[i], additionalArgs)
+                    const result = await this.#callTool(toolCall, additionalArgs)
                     output.push({
                         role: 'tool',
                         tool_call_id: result.tool_call_id,
