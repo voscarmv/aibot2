@@ -40,7 +40,10 @@ export class OpenAiClient implements AiClient {
         const tool_call_id = tool_call?.id;
         const functionName = tool_call?.function.name;
         const functionArgs = JSON.parse(tool_call?.function.arguments || '{}');
-        const fn = this.functions[functionName] as (arg1: object, arg2: object) => Promise<string>;
+        if (!functionName || !this.functions[functionName]) {
+            throw new Error(`Unknown tool function: ${functionName}`);
+        }
+        const fn = this.functions[functionName];
         const content = await fn(functionArgs, additionalArgs);
         return {
             tool_call_id,
