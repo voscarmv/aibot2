@@ -1,17 +1,17 @@
 import { type AiClient } from "./gpt.js";
-import { type MessageStore } from "./db.js";
+import { type MessageStore } from "./store.js";
 import type {
     ChatCompletionMessageParam,
 } from "openai/resources";
 
 export class ChatService {
     #aiClient: AiClient;
-    #dbApi: MessageStore;
+    #messageStore: MessageStore;
     #busy: string[];
 
     constructor(aiClient: AiClient, dbApi: MessageStore) {
         this.#aiClient = aiClient;
-        this.#dbApi = dbApi;
+        this.#messageStore = dbApi;
         this.#busy = [];
     }
 
@@ -43,17 +43,17 @@ export class ChatService {
 
     async processMessages(user_id: string, message: string): Promise<ChatCompletionMessageParam[]> {
         const output: ChatCompletionMessageParam[] = [];
-        await this.#dbApi.insertMessages(user_id, true, [{ role: 'user', content: message}]);
+        await this.#messageStore.insertMessages(user_id, true, [{ role: 'user', content: message}]);
         if(!this.#isBusy(user_id)){
             this.#makeBusy(user_id);
-            let queued = await this.#dbApi.queuedMessages(user_id);
+            let queued = await this.#messageStore.queuedMessages(user_id);
             while(queued.length > 0){
-                await this.#dbApi.unqueueUserMessages(user_id);
-                const msgs = await this.#dbApi.readUserMessages(user_id);
+                await this.#messageStore.unqueueUserMessages(user_id);
+                const msgs = await this.#messageStore.readUserMessages(user_id);
                 const reply = await this.#aiClient.runAI(msgs);
-                await this.#dbApi.insertMessages(user_id, false, reply);
+                await this.#messageStore.insertMessages(user_id, false, reply);
                 output.concat(reply);
-                queued = await this.#dbApi.queuedMessages(user_id);
+                queued = await this.#messageStore.queuedMessages(user_id);
             }
             this.#freeBusy(user_id);
         }
