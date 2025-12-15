@@ -63,6 +63,9 @@ export class OpenAiClient implements AiClient {
             model: this.model,
         });
         const message = completion?.choices?.[0]?.message;
+        if (!message) {
+            throw new Error("OpenAI returned no message");
+        }
         const tool_calls = message?.tool_calls;
         return {
             message,
@@ -92,11 +95,17 @@ export class OpenAiClient implements AiClient {
                 });
             }
             const reply = await this.#gpt(conversation, this.tools);
-            output.push(reply.message as ChatCompletionMessage);
-            conversation.push(reply.message as ChatCompletionMessage);
+            if (!reply.message) {
+                throw new Error("OpenAI returned no message");
+            }
+            output.push(reply.message);
+            conversation.push(reply.message);
             if (reply.tool_calls) {
                 for (let i = 0; i < reply.tool_calls.length; i++) {
-                    const result = await this.#callTool(reply.tool_calls[i] as ChatCompletionMessageFunctionToolCall, additionalArgs)
+                    if(!reply.tool_calls[i]){
+                        throw Error(' Tool call undefined')
+                    }
+                    const result = await this.#callTool(reply.tool_calls[i], additionalArgs)
                     output.push({
                         role: 'tool',
                         tool_call_id: result.tool_call_id,
