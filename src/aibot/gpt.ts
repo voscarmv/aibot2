@@ -20,8 +20,8 @@ type OpenAiClientOptions = {
   model?: string;
   instructions: string;
   additionalInstructions?: (...args: unknown[]) => string;
-  tools: ChatCompletionTool[];
-  functions: Record<string, (arg1: object, arg2: object) => Promise<string>>;
+  tools?: ChatCompletionTool[];
+  functions?: Record<string, (arg1: object, arg2: object) => Promise<string>>;
 };
 export class OpenAiClient implements AiClient {
   #openai: OpenAI;
@@ -36,8 +36,8 @@ export class OpenAiClient implements AiClient {
     model = "gpt-4",
     instructions,
     additionalInstructions = () => "",
-    tools,
-    functions,
+    tools = [],
+    functions = {},
   }: OpenAiClientOptions) {
     this.#openai = new OpenAI({ baseURL, apiKey });
     this.model = model;
