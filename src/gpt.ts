@@ -10,23 +10,38 @@ import type {
 export interface AiClient {
     runAI(messages: ChatCompletionMessageParam[]): Promise<ChatCompletionMessageParam[]>;
 }
-
+type OpenAiClientOptions = {
+  baseURL: string;
+  apiKey: string;
+  model?: string;
+  instructions: string;
+  additionalInstructions?: (...args: unknown[]) => string;
+  tools: ChatCompletionTool[];
+  functions: Record<string, (arg1: object, arg2: object) => Promise<string>>;
+};
 export class OpenAiClient implements AiClient {
-    #openai: OpenAI;
-    constructor(
-        private baseURL: string,
-        private apiKey: string,
-        private model: string = 'gpt-4',
-        private instructions: string,
-        private additionalInstructions: (arg0: object) => string = ({ }) => { return ''; },
-        private tools: ChatCompletionTool[],
-        private functions: Record<string, (arg1: object, arg2: object) => Promise<string>>,
-    ) {
-        this.#openai = new OpenAI({
-            baseURL: this.baseURL,
-            apiKey: this.apiKey
-        });
-    }
+  #openai: OpenAI;
+  private model: string;
+  private instructions: string;
+  private additionalInstructions: (...args: unknown[]) => string;
+  private tools: ChatCompletionTool[];
+  private functions: Record<string, (arg1: object, arg2: object) => Promise<string>>;
+  constructor({
+    baseURL,
+    apiKey,
+    model = "gpt-4",
+    instructions,
+    additionalInstructions = () => "",
+    tools,
+    functions,
+  }: OpenAiClientOptions) {
+    this.#openai = new OpenAI({ baseURL, apiKey });
+    this.model = model;
+    this.instructions = instructions;
+    this.additionalInstructions = additionalInstructions;
+    this.tools = tools;
+    this.functions = functions;
+  }
     // #parseMessages(messages: string[]): ChatCompletionMessageParam[] {
     //     return JSON.parse(`[${messages.join(",")}]`);
     // }
