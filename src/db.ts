@@ -18,7 +18,7 @@ export class OpenAiClient implements AiClient {
         private apiKey: string,
         private model: string = 'gpt-4',
         private instructions: string,
-        private additionalInstructions: () => string = () => { return ''; },
+        private additionalInstructions: (arg0: object) => string = ({}) => { return ''; },
         private tools: ChatCompletionTool[],
         private functions: Record<string, (arg1: object, arg2: object) => Promise<string>>,
     ) {
@@ -66,7 +66,7 @@ export class OpenAiClient implements AiClient {
             tool_calls
         };
     }
-    async runAI(messages: ChatCompletionMessageParam[], additionalArgs: object = {}): Promise<ChatCompletionMessageParam[]> {
+    async runAI(messages: ChatCompletionMessageParam[], additionalArgs: object = {}, additionalInstructionsArgs: object = {}): Promise<ChatCompletionMessageParam[]> {
         const output: ChatCompletionMessageParam[] = [];
         const conversation: ChatCompletionMessageParam[] = [...messages];
         conversation.unshift({
@@ -83,7 +83,7 @@ export class OpenAiClient implements AiClient {
             }
             conversation.splice(insertIndex, 0, {
                 role: 'system',
-                content: this.additionalInstructions()
+                content: this.additionalInstructions(additionalInstructionsArgs)
             });
             const reply = await this.#gpt(conversation, this.tools);
             output.push(reply.message as ChatCompletionMessage);
