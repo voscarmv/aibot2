@@ -58,7 +58,5 @@ export class ChatService {
             this.#freeBusy(user_id);
         }
         return output;
-        // this.#aiClient
-        // this.#dbApi
     }
 }
