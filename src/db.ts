@@ -18,7 +18,7 @@ export class OpenAiClient implements AiClient {
         private apiKey: string,
         private model: string = 'gpt-4',
         private instructions: string,
-        private additionalInstructions: (arg0: object) => string = ({}) => { return ''; },
+        private additionalInstructions: (arg0: object) => string = ({ }) => { return ''; },
         private tools: ChatCompletionTool[],
         private functions: Record<string, (arg1: object, arg2: object) => Promise<string>>,
     ) {
@@ -74,17 +74,20 @@ export class OpenAiClient implements AiClient {
             content: this.instructions
         });
         const replies = async () => {
-            let insertIndex = 0;
-            for (let i = conversation.length - 1; i >= 0; i--) {
-                if (conversation[i]?.role !== 'tool') {
-                    insertIndex = i;
-                    break;
+            const addInst = this.additionalInstructions(additionalInstructionsArgs);
+            if (addInst.length > 0) {
+                let insertIndex = 0;
+                for (let i = conversation.length - 1; i >= 0; i--) {
+                    if (conversation[i]?.role !== 'tool') {
+                        insertIndex = i;
+                        break;
+                    }
                 }
+                conversation.splice(insertIndex, 0, {
+                    role: 'system',
+                    content: this.additionalInstructions(additionalInstructionsArgs)
+                });
             }
-            conversation.splice(insertIndex, 0, {
-                role: 'system',
-                content: this.additionalInstructions(additionalInstructionsArgs)
-            });
             const reply = await this.#gpt(conversation, this.tools);
             output.push(reply.message as ChatCompletionMessage);
             conversation.push(reply.message as ChatCompletionMessage);
