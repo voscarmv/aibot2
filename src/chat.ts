@@ -2,12 +2,16 @@ import { type AiClient } from "./gpt.js";
 import { type DbApi } from "./db.js";
 
 export class ChatService {
-  constructor(
-    private aiClient: AiClient,
-    private dbApi: DbApi
-  ) {}
+  #aiClient: AiClient;
+  #dbApi: DbApi;
+
+  constructor(aiClient: AiClient, dbApi: DbApi) {
+    this.#aiClient = aiClient;
+    this.#dbApi = dbApi;
+  }
+
   async processMessages(): Promise<void> {
-    // Process loop for message queue
-    // involving DB/API/backend operations and GPT processing
+    // this.#aiClient
+    // this.#dbApi
   }
 }
