@@ -8,7 +8,11 @@ import type {
 } from "openai/resources";
 
 export interface AiClient {
-    runAI(messages: ChatCompletionMessageParam[]): Promise<ChatCompletionMessageParam[]>;
+    runAI(
+        messages: ChatCompletionMessageParam[],
+        additionalArgs?: object,
+        additionalInstructionsArgs?: object):
+        Promise<ChatCompletionMessageParam[]>;
 }
 type OpenAiClientOptions = {
   baseURL: string;
@@ -42,9 +46,7 @@ export class OpenAiClient implements AiClient {
     this.tools = tools;
     this.functions = functions;
   }
-    // #parseMessages(messages: string[]): ChatCompletionMessageParam[] {
-    //     return JSON.parse(`[${messages.join(",")}]`);
-    // }
+
     async #callTool(
         tool_call: ChatCompletionMessageFunctionToolCall,
         additionalArgs: object):
