@@ -6,7 +6,6 @@ import type {
     ChatCompletionMessage,
     ChatCompletionMessageToolCall
 } from "openai/resources";
-
 export interface AiClient {
     runAI(
         messages: ChatCompletionMessageParam[],
@@ -15,38 +14,37 @@ export interface AiClient {
         Promise<ChatCompletionMessageParam[]>;
 }
 type OpenAiClientOptions = {
-  baseURL: string;
-  apiKey: string;
-  model?: string;
-  instructions: string;
-  additionalInstructions?: (args: object) => string;
-  tools?: ChatCompletionTool[];
-  functions?: Record<string, (arg1: object, arg2: object) => Promise<string>>;
+    baseURL: string;
+    apiKey: string;
+    model?: string;
+    instructions: string;
+    additionalInstructions?: (args: object) => string;
+    tools?: ChatCompletionTool[];
+    functions?: Record<string, (arg1: object, arg2: object) => Promise<string>>;
 };
 export class OpenAiClient implements AiClient {
-  #openai: OpenAI;
-  private model: string;
-  private instructions: string;
-  private additionalInstructions: (args: object) => string;
-  private tools: ChatCompletionTool[];
-  private functions: Record<string, (arg1: object, arg2: object) => Promise<string>>;
-  constructor({
-    baseURL,
-    apiKey,
-    model = "gpt-4",
-    instructions,
-    additionalInstructions = () => "",
-    tools = [],
-    functions = {},
-  }: OpenAiClientOptions) {
-    this.#openai = new OpenAI({ baseURL, apiKey });
-    this.model = model;
-    this.instructions = instructions;
-    this.additionalInstructions = additionalInstructions;
-    this.tools = tools;
-    this.functions = functions;
-  }
-
+    #openai: OpenAI;
+    private model: string;
+    private instructions: string;
+    private additionalInstructions: (args: object) => string;
+    private tools: ChatCompletionTool[];
+    private functions: Record<string, (arg1: object, arg2: object) => Promise<string>>;
+    constructor({
+        baseURL,
+        apiKey,
+        model = "gpt-4",
+        instructions,
+        additionalInstructions = () => "",
+        tools = [],
+        functions = {},
+    }: OpenAiClientOptions) {
+        this.#openai = new OpenAI({ baseURL, apiKey });
+        this.model = model;
+        this.instructions = instructions;
+        this.additionalInstructions = additionalInstructions;
+        this.tools = tools;
+        this.functions = functions;
+    }
     async #callTool(
         tool_call: ChatCompletionMessageFunctionToolCall,
         additionalArgs: object):
@@ -95,7 +93,7 @@ export class OpenAiClient implements AiClient {
         additionalInstructionsArgs: object = {}):
         Promise<
             ChatCompletionMessageParam[]
-        >{
+        > {
         const output: ChatCompletionMessageParam[] = [];
         const conversation: ChatCompletionMessageParam[] = [...messages];
         conversation.unshift({

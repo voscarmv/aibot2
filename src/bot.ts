@@ -1,4 +1,5 @@
 import { OpenAiClient } from "./aibot/gpt.js";
+import "dotenv/config";
 
 export const aiClient = new OpenAiClient({
     baseURL: 'https://api.deepseek.com',
