@@ -1,7 +1,7 @@
 import { aiClient } from "./bot.js";
 import { messageStore } from "./api.js";
 import { ChatService } from "./aibot/chat.js";
-import { Bot, type Context } from "grammy";
+import { Bot } from "grammy";
 import "dotenv/config";
 
 const chat = new ChatService({
