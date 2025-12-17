@@ -16,7 +16,7 @@ export interface AiClient {
 type OpenAiClientOptions = {
     baseURL: string;
     apiKey: string;
-    model?: string;
+    model: string;
     instructions: string;
     additionalInstructions?: (args: object) => string;
     tools?: ChatCompletionTool[];
@@ -32,7 +32,7 @@ export class OpenAiClient implements AiClient {
     constructor({
         baseURL,
         apiKey,
-        model = "gpt-4",
+        model,
         instructions,
         additionalInstructions = () => "",
         tools = [],
