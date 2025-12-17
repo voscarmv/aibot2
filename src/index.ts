@@ -21,7 +21,9 @@ bot.on("message:text", async (ctx) => {
     const reply = (messages: ChatCompletionMessageParam[]) => messages.map(
         (msg: ChatCompletionMessageParam) => {
             console.log(new Date(), "to:", from, msg.content);
-            if (typeof (msg.content) === "string") ctx.reply(msg.content)
+            if (typeof (msg.content) === "string")
+                if (msg.role === "assistant")
+                    ctx.reply(msg.content)
         }
     );
     chat.processMessages(from, content, reply);
