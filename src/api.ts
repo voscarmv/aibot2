@@ -9,10 +9,6 @@ if (!process.env.DATABASE_URL) {
 }
 const db = drizzle(process.env.DATABASE_URL);
 
-// function parseMessages(messages: string[]): ChatCompletionMessageParam[] {
-//     return JSON.parse(`[${messages.join(",")}]`);
-// }
-
 async function readUserMessages(user_id: string): Promise<string[]> {
     const response: { message: string }[] = await db
         .select({ message: messages.message })
