@@ -33,7 +33,7 @@ export class ChatService {
         additionalToolsArgs?: object,
         additionalInstructionsArgs?: object):
         Promise<
-            ChatCompletionMessageParam[]
+            string[]
         > {
         await this.#messageStore.insertMessages(user_id, true, [{ role: 'user', content }]);
         if (this.#busy.has(user_id)) {
@@ -52,6 +52,6 @@ export class ChatService {
         }
         this.#busy.delete(user_id);
         this.#reply(output, replyFn);
-        return output;
+        return output.map((message)=>JSON.stringify(message));
     }
 }
