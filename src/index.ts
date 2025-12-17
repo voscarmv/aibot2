@@ -3,7 +3,6 @@ import { messageStore } from "./api.js";
 import { ChatService } from "./aibot/chat.js";
 import { Bot } from "grammy";
 import "dotenv/config";
-import type { ChatCompletionMessageParam } from "openai/resources";
 
 const chat = new ChatService({
     aiClient,
