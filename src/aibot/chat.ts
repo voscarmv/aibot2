@@ -17,11 +17,19 @@ export class ChatService {
         this.#aiClient = params.aiClient;
         this.#messageStore = params.messageStore;
     }
-
+    #reply(messages: ChatCompletionMessageParam[], replyFn: any) {
+        messages.map(
+            (msg: ChatCompletionMessageParam) => {
+                if (typeof (msg.content) === "string")
+                    if (msg.role === "assistant")
+                        replyFn(msg.content);
+            }
+        );
+    }
     async processMessages(
         user_id: string,
         content: string,
-        replyFn: (messages: ChatCompletionMessageParam[]) => void = () => null,
+        replyFn: any = () => null,
         additionalToolsArgs?: object,
         additionalInstructionsArgs?: object):
         Promise<
@@ -43,7 +51,7 @@ export class ChatService {
             queued = await this.#messageStore.queuedMessages(user_id);
         }
         this.#busy.delete(user_id);
-        replyFn(output);
+        this.#reply(output, replyFn);
         return output;
     }
 }

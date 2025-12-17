@@ -18,14 +18,10 @@ bot.on("message:text", async (ctx) => {
     const from = ctx.message.from.id.toString();
     const content = ctx.message.text;
     console.log(new Date(), "from:", from, content);
-    const reply = (messages: ChatCompletionMessageParam[]) => messages.map(
-        (msg: ChatCompletionMessageParam) => {
-            console.log(new Date(), "to:", from, msg.content);
-            if (typeof (msg.content) === "string")
-                if (msg.role === "assistant")
-                    ctx.reply(msg.content)
-        }
-    );
+    const reply = (content: string) => {
+        console.log(new Date(), "to:", from, content);
+        ctx.reply(content);
+    }
     chat.processMessages(from, content, reply);
 });
 
