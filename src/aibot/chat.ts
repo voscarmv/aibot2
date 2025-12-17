@@ -27,7 +27,7 @@ export class ChatService {
     }
 
     // Find a string (case-sensitive by default)
-    #isBusy(value: string) {
+    isBusy(value: string) {
         return this.#busy.find(item => item === value);
     }
 
@@ -44,30 +44,28 @@ export class ChatService {
     #listBusy() {
         return [...this.#busy];
     }
-
+    async enqueueMessage(user_id: string, content: string) {
+        await this.#messageStore.insertMessages(user_id, true, [{ role: 'user', content }]);
+    }
     async processMessages(
         user_id: string,
-        message: string,
         additionalToolsArgs?: object,
         additionalInstructionsArgs?: object):
         Promise<
             ChatCompletionMessageParam[]
         > {
-        const output: ChatCompletionMessageParam[] = [];
-        await this.#messageStore.insertMessages(user_id, true, [{ role: 'user', content: message }]);
-        if (!this.#isBusy(user_id)) {
-            this.#makeBusy(user_id);
-            let queued = await this.#messageStore.queuedMessages(user_id);
-            while (queued.length > 0) {
-                await this.#messageStore.unqueueUserMessages(user_id);
-                const msgs = await this.#messageStore.readUserMessages(user_id);
-                const reply = await this.#aiClient.runAI(msgs, additionalToolsArgs, additionalInstructionsArgs);
-                await this.#messageStore.insertMessages(user_id, false, reply);
-                output.concat(reply);
-                queued = await this.#messageStore.queuedMessages(user_id);
-            }
-            this.#freeBusy(user_id);
+        this.#makeBusy(user_id);
+        let output: ChatCompletionMessageParam[] = [];
+        let queued = await this.#messageStore.queuedMessages(user_id);
+        while (queued.length > 0) {
+            await this.#messageStore.unqueueUserMessages(user_id);
+            const msgs = await this.#messageStore.readUserMessages(user_id);
+            const reply = await this.#aiClient.runAI(msgs, additionalToolsArgs, additionalInstructionsArgs);
+            await this.#messageStore.insertMessages(user_id, false, reply);
+            output = output.concat(reply);
+            queued = await this.#messageStore.queuedMessages(user_id);
         }
+        this.#freeBusy(user_id);
         return output;
     }
 }
