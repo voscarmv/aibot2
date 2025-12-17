@@ -11,50 +11,27 @@ type ChatParams = {
 export class ChatService {
     #aiClient: AiClient;
     #messageStore: MessageStore;
-    #busy: string[];
+    #busy = new Set<string>();
 
     constructor(params: ChatParams) {
         this.#aiClient = params.aiClient;
         this.#messageStore = params.messageStore;
-        this.#busy = [];
     }
 
-    #makeBusy(value: string) {
-        if (!this.#busy.includes(value)) {
-            this.#busy.push(value);
-        }
-        return this.#busy;
-    }
-
-    // Find a string (case-sensitive by default)
-    isBusy(value: string) {
-        return this.#busy.find(item => item === value);
-    }
-
-    // Remove a string (removes all occurrences)
-    #freeBusy(value: string) {
-        let index;
-        while ((index = this.#busy.indexOf(value)) !== -1) {
-            this.#busy.splice(index, 1);
-        }
-        return this.#busy;
-    }
-
-    // Optional helper to list all items
-    #listBusy() {
-        return [...this.#busy];
-    }
-    async enqueueMessage(user_id: string, content: string) {
-        await this.#messageStore.insertMessages(user_id, true, [{ role: 'user', content }]);
-    }
     async processMessages(
         user_id: string,
+        content: string,
+        replyFn: (messages: ChatCompletionMessageParam[]) => void = () => null,
         additionalToolsArgs?: object,
         additionalInstructionsArgs?: object):
         Promise<
             ChatCompletionMessageParam[]
         > {
-        this.#makeBusy(user_id);
+        await this.#messageStore.insertMessages(user_id, true, [{ role: 'user', content }]);
+        if (this.#busy.has(user_id)) {
+            return [];
+        }
+        this.#busy.add(user_id);
         let output: ChatCompletionMessageParam[] = [];
         let queued = await this.#messageStore.queuedMessages(user_id);
         while (queued.length > 0) {
@@ -65,7 +42,8 @@ export class ChatService {
             output = output.concat(reply);
             queued = await this.#messageStore.queuedMessages(user_id);
         }
-        this.#freeBusy(user_id);
+        this.#busy.delete(user_id);
+        replyFn(output);
         return output;
     }
 }
